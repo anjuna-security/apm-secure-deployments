@@ -1,0 +1,13 @@
+.terraform
+.terraform.*
+tls/*
+terraform.tfstate*
+apm-installer.tar.gz
+authorized_keys
+config/apm.arm.json
+cert.pem
+client_env.sh
+cert.pfx
+.tmp
+disk.vhd
+.disk-build-*
