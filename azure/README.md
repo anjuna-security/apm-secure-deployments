@@ -1,6 +1,10 @@
 # Anjuna Policy Manager on Azure
 
-In this folder you will find the scripts for deploying the Anjuna Policy Manager (APM) on Azure.
+In this folder you will find the scripts for deploying the Anjuna Policy Manager (APM) on Azure. 
+
+The scripts defined here were designed with the goal of getting you up and running with APM as quickly and securely as possible and should be used as a general guideline for your own deployments.
+
+Your production environment might have needs not addressed by these scripts and changes might be required. Please, feel free to fork this repo and customize the scripts to better accommodate your needs.
 
 ## Environment requirements
 
@@ -55,13 +59,13 @@ By running this, all necessary Azure resources will be provisioned for you by ou
 1. a Private Image Gallery;
 1. a Virtual Network, Subnet, Network Interface Controller, Public IP Address, and a Network Security Group;
 1. a Storage Account; 
-1. a Key Vault;
+1. a Azure Key Vault;
 1. a Microsoft Azure Attestation endpoint;
 
 The `deploy` command will also:
 
 1. download the APM and Anjuna Azure installers;
-1. define APM's master key in the Key Vault with a [Secure Key Release (SKR)](image/README.md) policy;
+1. define APM's master key in the Azure Key Vault with a [Secure Key Release (SKR)](image/README.md) policy;
 1. build an APM docker image locally;
 1. build the APM Confidential Container disk locally;
 1. upload the disk to the image gallery;
@@ -139,9 +143,25 @@ Enclave and Signer values above are just examples.
 
 **Note**: If you are using a fully-qualified domain name that you **own** in a public DNS registrar, instead of adding a new entry to your `/etc/hosts` file you could update the DNS A record for the domain name to point to the APM server's public IP address.
 
+## Upgrading the Anjuna Policy Manager
+
+To upgrade your live APM Server to a new version some downtime will be required. Make sure to run the following command to stop the APM Server first:
+
+```bash
+./infra.sh stop
+```
+
+Then, run your original command to deploy APM and assign a new image version:
+
+```bash
+./infra deploy ... --image-version <new version>
+```
+
+The image version must follow the [semantic versioning](https://semver.org/) format. They are unique and the default value is `1.0.0`.
+
 ## Tearing down the Anjuna Policy Manager
 
-To stop the Anjuna Policy Manager Confidential Container, with **no** data loss, simply run:
+To stop the Anjuna Policy Manager Confidential Container with **no** data loss, simply run:
 
 ```bash
 ./infra.sh stop
