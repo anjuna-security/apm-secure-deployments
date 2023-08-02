@@ -4,7 +4,7 @@ In this folder you will find the scripts for deploying the Anjuna Policy Manager
 
 The scripts defined here were designed with the goal of getting you up and running with APM as quickly and securely as possible and should be used as a general guideline for your own deployments.
 
-Your production environment might have needs not addressed by these scripts and changes might be required. Please, feel free to fork this repo and customize the scripts to better accommodate your needs.
+Your production environment might have needs not addressed by these scripts and changes might be required. Feel free to fork this repo and customize the scripts to better accommodate your needs.
 
 ## Environment requirements
 
@@ -28,12 +28,12 @@ A few things are required in order to run these scripts:
     az login --use-device-code
     ```
 
-1. You have the role Owner assigned on the Azure subscription you want to use. To quickly check if you have the role, run:
+1. You have the role *Owner* assigned on the Azure subscription that you want to use. To quickly check if you have the role, run:
 
     ```bash
-    az role assignment list --assignee <your-email> --query "[?roleDefinitionName=='Owner']"
+    user=$(az ad signed-in-user show | jq -r .userPrincipalName)
+    az role assignment list | jq ".[] | select(.principalName == \"${user}\" and .roleDefinitionName == \"Owner\")"
     ```
-    Please, replace `<your-email>` with your user’s email address.
 
     If the output is empty, you do not have the role assigned. Please contact your Azure subscription administrator to assign the role to you.
 
@@ -59,7 +59,7 @@ By running this, all necessary Azure resources will be provisioned for you by ou
 1. a Private Image Gallery;
 1. a Virtual Network, Subnet, Network Interface Controller, Public IP Address, and a Network Security Group;
 1. a Storage Account; 
-1. a Azure Key Vault;
+1. an Azure Key Vault;
 1. a Microsoft Azure Attestation endpoint;
 
 The `deploy` command will also:
@@ -86,7 +86,7 @@ In this case, the hostname of the APM Server will be overwritten with the Common
 
 **Note**: the `--tls-pfx-password` is optional in this case and will depend on whether your certificate is password protected or not.
 
-If no password is provided, `infra.sh` expects the input certificate to be unprotected and in order to guarantee its safety, the script will generate a strong random password, protect the PFX file with it and store it encrypted in AKV with APM's master key.
+If no password is provided, `infra.sh` expects the input certificate to be unprotected, and in order to guarantee its safety, the script will generate a strong random password, protect the PFX file with it, and store it encrypted in AKV with APM's master key.
 
 Only PKCS12 Certificates are supported. If you have a PEM certificate and key, you can convert them to PKCS12 format with the following command:
 
@@ -102,7 +102,7 @@ After deploying the APM, you will need to update the `/etc/hosts` file with the 
 echo 20.237.94.226 apm-server.test | sudo tee -a /etc/hosts
 ```
 
-After you apply the command to add the `/etc/hosts` entry for APM, you can start managing your secrets and enclaves with the `anjuna-policy-manager` cli tool. Make sure to configure your terminal session first with the following command:
+After you apply the command to add the `/etc/hosts` entry for APM, you can start managing your secrets and enclaves with the `anjuna-policy-manager` CLI tool. Make sure to configure your terminal session first with the following command:
 
 ```bash
 source client_env.sh
@@ -130,7 +130,7 @@ Once APM is ready, a secret can be created with the following command:
 anjuna-policy-manager secret create dek --value "test"
 ```
 
-An Anjuna SGX enclave can be authorized to use that key with the following command:
+An Anjuna Enclave can be authorized to use that key with the following command:
 
 ```bash
 anjuna-policy-manager authorize enclave \
@@ -141,11 +141,11 @@ anjuna-policy-manager authorize enclave \
 
 Enclave and Signer values above are just examples.
 
-**Note**: If you are using a fully-qualified domain name that you **own** in a public DNS registrar, instead of adding a new entry to your `/etc/hosts` file you could update the DNS A record for the domain name to point to the APM server's public IP address.
+**Note**: If you are using a fully-qualified domain name that you **own** in a public DNS registrar, instead of adding a new entry to your `/etc/hosts` file, you could update the DNS A record for the domain name to point to the APM server's public IP address.
 
 ## Upgrading the Anjuna Policy Manager
 
-To upgrade your live APM Server to a new version some downtime will be required. Make sure to run the following command to stop the APM Server first:
+To upgrade your live APM Server to a new version, some downtime will be required. Make sure to run the following command to stop the APM Server first:
 
 ```bash
 ./infra.sh stop
@@ -157,7 +157,7 @@ Then, run your original command to deploy APM and assign a new image version:
 ./infra deploy ... --image-version <new version>
 ```
 
-The image version must follow the [semantic versioning](https://semver.org/) format. They are unique and the default value is `1.0.0`.
+The image version must follow the [semantic versioning](https://semver.org/) format. They are unique, and the default value is `1.0.0`.
 
 ## Tearing down the Anjuna Policy Manager
 

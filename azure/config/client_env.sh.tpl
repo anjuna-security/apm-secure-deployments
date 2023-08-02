@@ -1,5 +1,5 @@
 source .tmp/env.sh
-export PATH=${PATH:-}:${PWD:-}/.env
+export PATH=${PWD:-}/.tmp:${PATH:-}
 
 export APM_IP_ADDRESS="$(terraform -chdir=terraform output -raw apm_public_ip)"
 export APM_PRIVATE_IP_ADDRESS="$(terraform -chdir=terraform output -raw apm_private_ip)"

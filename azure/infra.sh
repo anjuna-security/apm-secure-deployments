@@ -400,8 +400,9 @@ function checkenv() {
     nok=1
   else
     local result=0
-    az ad sp show --id $(az account show --query "user.name" -o tsv) 2> /dev/null || result=$?
-    if [[ $result -eq 1 ]]; then
+    user=$(az ad signed-in-user show | jq -r .userPrincipalName)
+    role=$(az role assignment list | jq ".[] | select(.principalName == \"${user}\" and .roleDefinitionName == \"Owner\")")
+    if [[ -z "${role}" ]]; then
       echo "Please login to Azure with an account that has Owner role."
       nok=1
     fi

@@ -2,7 +2,7 @@
 
 In this repo you will find a collection of scripts for securely deploying the Anjuna Policy Manager on each of the major cloud providers.
 
-Please find the instructions for deploying the Anjuna Policy Manager on a Confidential Container in Azure with AMD-SEV Confidential VMs [here](azure/README.md). More platforms are planned to be supported in the future.
+You can find the instructions for deploying the Anjuna Policy Manager on a Confidential Container in Azure with AMD-SEV Confidential VMs [here](azure/README.md). More platforms are planned to be supported in the future.
 
 The Anjuna Policy Manager Server will be deployed securely inside a Secure Enclave. For technical details about our products, please visit our [documentation website](https://docs.anjuna.io).
 
