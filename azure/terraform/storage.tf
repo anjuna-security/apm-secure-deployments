@@ -6,15 +6,15 @@ resource "azurerm_storage_account" "apm" {
 
   account_tier             = "Standard"
   account_replication_type = "LRS"
+
+  network_rules {
+    default_action             = "Deny"
+    virtual_network_subnet_ids = [azurerm_subnet.apm.id]
+    ip_rules = ["${chomp(data.http.myip.response_body)}"]
+  }
 }
 
 resource "azurerm_storage_container" "apm" {
   name                 = "apmsac${random_string.random.result}"
   storage_account_name = azurerm_storage_account.apm.name
-}
-
-resource "azurerm_key_vault_secret" "sa_access_key" {
-  name         = "apm-key-${random_string.random.result}"
-  value        = azurerm_storage_account.apm.primary_access_key
-  key_vault_id = azurerm_key_vault.apm.id
 }

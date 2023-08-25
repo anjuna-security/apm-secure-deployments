@@ -11,4 +11,5 @@ storage "azure" {
   accountName = "${APM_SA_NAME}"
   container = "vault"
   environment = "AzurePublicCloud"
+  accountKey = "${APM_SAA_KEY}"
 }

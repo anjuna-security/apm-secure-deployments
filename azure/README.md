@@ -28,15 +28,6 @@ A few things are required in order to run these scripts:
     az login --use-device-code
     ```
 
-1. You have the role *Owner* assigned on the Azure subscription that you want to use. To quickly check if you have the role, run:
-
-    ```bash
-    user=$(az ad signed-in-user show | jq -r .userPrincipalName)
-    az role assignment list | jq ".[] | select(.principalName == \"${user}\" and .roleDefinitionName == \"Owner\")"
-    ```
-
-    If the output is empty, you do not have the role assigned. Please contact your Azure subscription administrator to assign the role to you.
-
 To quickly verify if your environment is ready to deploy the Anjuna Policy Manager, run:
 
 ```bash

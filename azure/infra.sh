@@ -256,6 +256,15 @@ function tls() {
   openssl pkcs12 -in "${APM_TLS_PFX}" -out cert.pem -nodes -nokeys -password "pass:${password}"
 }
 
+# `saa_key` stores the Storage Account Access Key encrypted in the APM Key Vault
+function saa_key() {
+  local -r key=$(terraform -chdir=terraform output -raw storage_account_access_key)
+  local -r encrypted_saa_key=$(master_key_encrypt_akv "${key}")
+
+  echo "Storing encrypted Storage Account Access Key..."
+  az keyvault secret set --vault-name "${APM_KEYVAULT_NAME}" --name apm-saa-key --value "${encrypted_saa_key}"
+}
+
 # `prep` prepares the needed APM deployment infra
 function prep() {
   setup
@@ -267,6 +276,7 @@ function prep() {
     upload
   fi
   tls
+  saa_key
 }
 
 # `instruct` instructs the user on how to add the APM server IP and host name to their /etc/hosts
@@ -398,14 +408,6 @@ function checkenv() {
   if [[ -z "$(az account show)" ]]; then
     echo "Please login to Azure."
     nok=1
-  else
-    local result=0
-    user=$(az ad signed-in-user show | jq -r .userPrincipalName)
-    role=$(az role assignment list | jq ".[] | select(.principalName == \"${user}\" and .roleDefinitionName == \"Owner\")")
-    if [[ -z "${role}" ]]; then
-      echo "Please login to Azure with an account that has Owner role."
-      nok=1
-    fi
   fi
   return ${nok}
 }

@@ -17,9 +17,10 @@ function check() {
 
 function prep() {
   mkdir -p /run/anjuna-policy-manager/tls
-  az login --identity
+  az login --identity --allow-no-subscriptions
 
   local -r encrypted_password="$(az keyvault secret show --vault-name "${APM_KEYVAULT_NAME}" --name "apm-tls-cert-password" | jq -r .value)"
+  local -r encrypted_saa_key="$(az keyvault secret show --vault-name "${APM_KEYVAULT_NAME}" --name "apm-saa-key" | jq -r .value)"
   local -r password="$(master_key_decrypt "${encrypted_password}")"
   az keyvault secret download \
       --vault-name "${APM_KEYVAULT_NAME}" \
@@ -31,7 +32,8 @@ function prep() {
   openssl pkcs12 -in /run/anjuna-policy-manager/tls/cert.pfx -nocerts -nodes -passin "pass:${password}" \
       -out /run/anjuna-policy-manager/tls/key.pem
 
-  envsubst < /opt/build/apm.hcl.tpl > /root/apm.hcl
+  APM_SAA_KEY="$(master_key_decrypt "${encrypted_saa_key}")" \
+    envsubst < /opt/build/apm.hcl.tpl > /root/apm.hcl
 
   echo "127.0.0.1 ${APM_HOSTNAME}" >> /etc/hosts
 
