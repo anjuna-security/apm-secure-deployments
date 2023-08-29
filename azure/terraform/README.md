@@ -51,7 +51,9 @@ Defines the outputs of the Terraform project, which will be used by the [infra.s
 
 Defines an Azure Storage Account, which will be used to store APM's data (such as secrets and policies). Defines also a Storage Container to store APM Server's launch logs.
 
-The Storage Account is configured by default to only allow access from the subnet where APM is deployed and your computer. Modify the `network_rules` block to change this behavior.
+The Storage Account is configured by default to allow access from all networks, but already has network rules to allow access from the subnet where APM is deployed and also your computer's Public IP Address.
+
+In case you wish to not allow access from all networks, simply modify the `network_rules.default_action` field to `Deny`. In this case, if you are running this Terraform project from a machine in Azure from the same account, make sure to also add the machine's subnet to the `network_rules.virtual_network_subnet_ids` list.
 
 Use this file to define further Storage Account related resources such as other containers, file shares, etc.
 
