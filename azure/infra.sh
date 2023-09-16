@@ -317,7 +317,8 @@ function deploy() {
     --enable-secure-boot true \
     --nics "${APM_NIC}" \
     --assign-identity "${APM_IDENTITY_ID}" \
-    --os-disk-delete-option delete
+    --os-disk-delete-option delete \
+    --generate-ssh-keys
   instruct
 }
 
