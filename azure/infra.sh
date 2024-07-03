@@ -4,7 +4,7 @@ set -e -o pipefail
 
 ARC_BASE_URL="https://api.downloads.anjuna.io/v1/releases"
 TMPDIR=".tmp"
-PATH=${PATH}:${TMPDIR}
+PATH=${TMPDIR}:${PATH}
 
 # `resolve_apm_host` resolves the target hostname of the APM instance
 # if a custom tls certificate is provided, it will extract the hostname from the certificate
@@ -479,7 +479,7 @@ OPERATION=usage
 APM_HOSTNAME=${TF_VAR_apm_host:-$(grep apm_host -A2 terraform/variables.tf | awk -F'"' '/default/ {print $2}')}
 APM_PORT=${TF_VAR_apm_port:-$(grep apm_port -A2 terraform/variables.tf | awk -F'"' '/default/ {print $2}')}
 APM_IMAGE_VERSION="1.0.0"
-APM_DISK_SIZE="20G"
+APM_DISK_SIZE="4G"
 ANJUNA_API_TOKEN=""
 APM_TLS_PFX=""
 APM_TLS_PFX_PASSWORD=""
@@ -505,7 +505,7 @@ while [[ "$#" -gt 0 ]]; do
   --tls-pfx-password)           APM_TLS_PFX_PASSWORD="$2"; shift;;
   --anjuna-azure-installer-url) ANJUNA_AZURE_INSTALLER_URL="$2"; shift;;
   --apm-installer-url)          APM_INSTALLER_URL="$2"; shift;;
-  --skip-image)                 SKIP_IMAGE="yes";; 
+  --skip-image)                 SKIP_IMAGE="yes";;
   *)
     echo "Unknown option: $1"
     usage

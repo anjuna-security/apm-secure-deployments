@@ -1,4 +1,4 @@
-FROM ubuntu:20.04 as builder
+FROM ubuntu:20.04 AS builder
 
 COPY apm-installer.tar.gz /opt/build/
 RUN mkdir -p /opt/anjuna/bin && \
@@ -12,7 +12,7 @@ RUN apt-get update && \
     dpkg -i azguestattestation1_1.0.5_amd64.deb && \
     rm azguestattestation1_1.0.5_amd64.deb
 
-FROM builder as skr
+FROM builder AS skr
 
 WORKDIR /skr-client
 
@@ -25,7 +25,7 @@ RUN git clone https://github.com/Azure/confidential-computing-cvm-guest-attestat
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
     make
 
-FROM builder as runner
+FROM builder AS runner
 
 WORKDIR /root/
 
@@ -37,12 +37,12 @@ COPY apm.hcl.tpl /opt/build/
 COPY run.sh /opt/build/
 COPY --from=skr /skr-client/confidential-computing-cvm-guest-attestation/cvm-securekey-release-app/build/AzureAttestSKR /usr/bin/AzureAttestSKR
 
-ENV APM_HOSTNAME ""
-ENV APM_SA_NAME ""
-ENV APM_KEYVAULT_NAME ""
-ENV APM_PORT "8200"
-ENV APM_MASTER_KEY_ID ""
-ENV MAA_ENDPOINT ""
+ENV APM_HOSTNAME=""
+ENV APM_SA_NAME=""
+ENV APM_KEYVAULT_NAME=""
+ENV APM_PORT="8200"
+ENV APM_MASTER_KEY_ID=""
+ENV MAA_ENDPOINT=""
 
 EXPOSE 8200
 
