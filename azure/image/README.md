@@ -40,13 +40,18 @@ The second stage (`skr`) builds the `AzureAttestSKR` client and installs the nec
 
 The third and final stage (`runner`) copies the built `AzureAttestSKR` client and the `run.sh` script to the image and configures the entrypoint to be `run.sh`.
 
+The following environment variables are available to be configured:
+
+1. `APM_HOSTNAME`: The hostname of the APM instance;
+1. `APM_SA_NAME`: The name of the Storage Account that will be used by the APM Server as storage backend;
+1. `APM_KEYVAULT_NAME`: The name of the Azure Key Vault that will be leveraged by this APM deployment;
+1. `APM_PORT`: The port where APM will be listening for requests;
+1. `APM_MK_ID`: The Azure resource ID to the APM Master Key managed by the Key Vault specified by the `APM_KEYVAULT_NAME` env;
+1. `MAA_ENDPOINT`: The Microsoft Azure Attestation endpoint that will be used to attest APM's identity and then used to perform the SKR procedure;
+
 ## APM Server config template
 
-The `apm.hcl.tpl` file specifies a configuration template that will be used by the `run.sh` script to configure the APM Server. `run.sh` will replace the template variables with the appropriate values before continuing, namely:
-
-1. APM_HOSTNAME: The hostname of the APM instance;
-1. APM_PORT: The port where APM will be listening for requests;
-1. APM_SA_NAME: The name of the Storage Account that will be used by the APM Server as storage backend;
+The `apm.hcl.tpl` file specifies a configuration template that will be used by the `run.sh` script to configure the APM Server. `run.sh` will replace the template variables with the appropriate values before continuing, namely: `APM_HOSTNAME`, `APM_PORT` and `APM_SA_NAME`;
 
 The configuration also specifies that the APM Server will enforce TLS. The certificate, password protected private key, and encrypted password will be fetched from an Azure Key Vault. The encrypted password will be decrypted with `AzureAttestSKR`, and the `run.sh` script will make sure to save the `cert.pem` and the `key.pem` values at the paths expected by the config template.
 

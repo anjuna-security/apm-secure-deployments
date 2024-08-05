@@ -161,7 +161,7 @@ function build() {
 
   echo "Building the APM Disk (root privileges required)..."
   rm -f "${TMPDIR}/enclave.yaml"
-  APM_MASTER_KEY_ID=$(get_master_key_id) \
+  APM_MK_ID=$(get_master_key_id) \
     envsubst < config/enclave.yaml.tpl > ${TMPDIR}/enclave.yaml
   anjuna-azure-cli disk create \
     --docker-uri "${image_name}" \

@@ -6,7 +6,7 @@ EPID_API_KEY="${EPID_API_KEY:-"d36d1a88677c4f989162e589676b3ad4"}"
 DCAP_API_KEY="${DCAP_API_KEY:-"88e02859aca140838a565b86d488ccbf"}"
 
 function check() {
-  local -r envs="APM_HOSTNAME APM_PORT APM_SA_NAME APM_KEYVAULT_NAME APM_MASTER_KEY_ID MAA_ENDPOINT"
+  local -r envs="APM_HOSTNAME APM_PORT APM_SA_NAME APM_KEYVAULT_NAME APM_MK_ID MAA_ENDPOINT"
   for env in ${envs}; do
     if [[ -z "${!env}" ]]; then
       echo "Missing environment variable: ${env}"
@@ -44,13 +44,13 @@ function prep() {
 # `master_key_encrypt` encrypts a value using APM's master key through Azure SKR client
 function master_key_encrypt() {
   local -r value="${1}"
-  AzureAttestSKR -a "${MAA_ENDPOINT}" -k "${APM_MASTER_KEY_ID}" -s "${value}" -w
+  AzureAttestSKR -a "${MAA_ENDPOINT}" -k "${APM_MK_ID}" -s "${value}" -w
 }
 
 # `master_key_decrypt` decrypts a value using APM's master key through Azure SKR client
 function master_key_decrypt() {
   local -r value="${1}"
-  AzureAttestSKR -a "${MAA_ENDPOINT}" -k "${APM_MASTER_KEY_ID}" -s "${value}" -u
+  AzureAttestSKR -a "${MAA_ENDPOINT}" -k "${APM_MK_ID}" -s "${value}" -u
 }
 
 # `check_apm` checks the health of the APM instance before proceeding
