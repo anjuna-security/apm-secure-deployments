@@ -159,7 +159,7 @@ function build() {
   echo "Building APM Docker Image..."
   docker build -t "${image_name}" -f "image/Dockerfile" "image"
 
-  echo "Building the APM Disk (root privileges required)..."
+  echo "Building the APM Disk..."
   rm -f "${TMPDIR}/enclave.yaml"
   APM_MK_ID=$(get_master_key_id) \
     envsubst < config/enclave.yaml.tpl > ${TMPDIR}/enclave.yaml
