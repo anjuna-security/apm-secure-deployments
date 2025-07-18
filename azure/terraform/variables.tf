@@ -3,11 +3,6 @@ variable "instance_size" {
   default     = "Standard_DC4as_v5"
 }
 
-variable "image" {
-  description = "Image to be used for the VM instance"
-  default     = "Canonical:0001-com-ubuntu-confidential-vm-focal:20_04-lts-cvm:latest"
-}
-
 variable "location" {
   description = "The geo location where resources should be created at"
   default     = "east us"
@@ -25,7 +20,7 @@ variable "apm_hostname" {
 
 variable "apm_port" {
   description = "The http port on which APM is listening"
-  default = "8200"
+  default     = "8200"
 }
 
 variable "base_address_prefix" {
@@ -42,3 +37,4 @@ variable "apm_master_key_name" {
   description = "Name of the APM master key to be created in the key vault"
   default     = "apm-master-key"
 }
+
