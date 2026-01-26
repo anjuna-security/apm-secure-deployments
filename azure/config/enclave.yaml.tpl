@@ -1,4 +1,4 @@
-version: 1.7
+version: 1.9
 
 environment:
   - APM_PORT=${APM_PORT}

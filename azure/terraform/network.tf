@@ -23,7 +23,7 @@ resource "azurerm_subnet" "apm" {
   service_endpoints = ["Microsoft.Storage"]
 }
 
-# defines a network security group with rules to better control 
+# defines a network security group with rules to better control
 # communication with APM from the internet
 resource "azurerm_network_security_group" "apm" {
   name                = "apm-nsg-${random_string.random.result}"

@@ -1,13 +1,15 @@
-FROM ubuntu:22.04 AS builder
+FROM ubuntu:24.04 AS builder
+
+ARG VAULT_VERSION=1.21.1
 
 COPY apm-installer.tar.gz /opt/build/
-RUN mkdir -p /opt/anjuna/bin && \
-    tar -C /opt/anjuna/bin -xf /opt/build/apm-installer.tar.gz
+RUN mkdir -p /opt/anjuna/apm && \
+    tar -C /opt/anjuna/apm -xf /opt/build/apm-installer.tar.gz
 
 ENV DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
 
 RUN apt-get update && \
-    apt-get install -y curl gettext wget libssl-dev libcurl4-openssl-dev libjsoncpp-dev libboost-all-dev nlohmann-json3-dev jq && \
+    apt-get install -y curl gettext wget libssl-dev libcurl4-openssl-dev libjsoncpp-dev libboost-all-dev nlohmann-json3-dev jq unzip && \
     wget https://packages.microsoft.com/repos/azurecore/pool/main/a/azguestattestation1/azguestattestation1_1.1.0_amd64.deb && \
     dpkg -i azguestattestation1_1.1.0_amd64.deb && \
     rm azguestattestation1_1.1.0_amd64.deb
@@ -18,11 +20,8 @@ WORKDIR /skr-client
 
 RUN apt-get install -y git cmake build-essential
 
-COPY openssl.patch .
 RUN git clone https://github.com/Azure/confidential-computing-cvm-guest-attestation && \
     cd confidential-computing-cvm-guest-attestation/cvm-securekey-release-app && \
-    git checkout b774ef5e935ee2f7596db49d10c3a308d6e10c7a && \
-    git apply /skr-client/openssl.patch && \
     mkdir build && cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
     make
@@ -30,6 +29,11 @@ RUN git clone https://github.com/Azure/confidential-computing-cvm-guest-attestat
 FROM builder AS runner
 
 WORKDIR /root/
+
+# Install Vault
+RUN wget https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip && \
+    unzip vault_${VAULT_VERSION}_linux_amd64.zip -d /usr/local/bin/ && \
+    rm vault_${VAULT_VERSION}_linux_amd64.zip
 
 RUN apt autoremove -y && \
     curl -sL https://aka.ms/InstallAzureCLIDeb | bash && \
