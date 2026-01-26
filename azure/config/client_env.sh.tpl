@@ -18,7 +18,7 @@ export VAULT_CACERT="$(pwd)/cert.pem"
 export ANJUNA_ADDR="https://${APM_HOSTNAME}:${APM_PORT}"
 export ANJUNA_CACERT="$(pwd)/cert.pem"
 
-echo -n "Verifying if APM is ready (this may take up to 5 minutes)..."
+echo -n "Verifying if Vault is ready (this may take up to 5 minutes)..."
 ok=""
 for i in {1..30}; do
     sleep 10
@@ -31,11 +31,11 @@ for i in {1..30}; do
 done
 
 if [[ -z "$ok" ]] ; then
-    echo "APM is not ready. Please check the logs and try again later."
+    echo "Vault is not ready. Please check the logs and try again later."
     return 1
 fi
 
-echo "APM is ready!"
+echo "Vault and the APM are ready!"
 
 export ANJUNA_TOKEN="$(az keyvault secret show \
     --vault-name "${APM_KEYVAULT_NAME}" \

@@ -14,17 +14,17 @@ variable "group_name" {
 }
 
 variable "apm_hostname" {
-  description = "The hostname of the APM server"
+  description = "The hostname of the Vault server"
   default     = "apm-server.test"
 }
 
 variable "apm_port" {
-  description = "The http port on which APM is listening"
+  description = "The http port on which Vault is listening"
   default     = "8200"
 }
 
 variable "base_address_prefix" {
-  description = "The base address prefix for APM's virtual network"
+  description = "The base address prefix for Vault's virtual network"
   default     = "10.0"
 }
 
@@ -34,7 +34,7 @@ variable "apm_image_version" {
 }
 
 variable "apm_master_key_name" {
-  description = "Name of the APM master key to be created in the key vault"
+  description = "Name of the Vault master key to be created in the key vault"
   default     = "apm-master-key"
 }
 

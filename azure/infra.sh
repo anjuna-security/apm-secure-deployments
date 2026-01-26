@@ -2,7 +2,7 @@
 
 set -e -o pipefail
 
-ARC_BASE_URL="https://api.downloads.anjuna.io/v1/releases"
+ARC_BASE_URL="https://api.resources.anjuna.io/api/v1/releases"
 TMPDIR=".tmp"
 PATH=${TMPDIR}:${PATH}
 
@@ -19,13 +19,13 @@ function resolve_apm_host() {
 
 # `get_latest_apm_installer` returns the latest APM installer url
 function get_latest_apm_installer() {
-  local -r artifact=$(wget -O- ${ARC_BASE_URL}/apm -q --header "X-Anjuna-Auth-Token: $ANJUNA_API_TOKEN" | jq -r .products[0].artifacts[0].filename)
+  local -r artifact=$(wget -O- ${ARC_BASE_URL}/apm -q --header "X-Anjuna-Auth-Token: $ANJUNA_API_TOKEN" | jq -r .[0].artifacts[0].filename)
   echo "${ARC_BASE_URL}/${artifact}"
 }
 
 # `get_latest_anjuna_azure_installer` returns the latest Anjuna installer url
 function get_latest_anjuna_azure_installer() {
-  local -r artifact=$(wget -O- ${ARC_BASE_URL}/azsev -q --header "X-Anjuna-Auth-Token: $ANJUNA_API_TOKEN" | jq -r .products[0].artifacts[0].filename)
+  local -r artifact=$(wget -O- ${ARC_BASE_URL}/azsev -q --header "X-Anjuna-Auth-Token: $ANJUNA_API_TOKEN" | jq -r .[0].artifacts[0].filename)
   echo "${ARC_BASE_URL}/${artifact}"
 }
 
@@ -37,7 +37,7 @@ function download_installers() {
 
   local args=""
   if [[ -n "${ANJUNA_API_TOKEN}" ]]; then
-      args="X-Anjuna-Auth-Token:${ANJUNA_API_TOKEN}"
+    args="X-Anjuna-Auth-Token:${ANJUNA_API_TOKEN}"
   fi
 
   # download apm installer if not already downloaded
@@ -87,8 +87,8 @@ function provision() {
   terraform -chdir=terraform init -upgrade
 
   TF_VAR_apm_hostname="${APM_HOSTNAME}" \
-  TF_VAR_apm_image_version="${APM_IMAGE_VERSION}" \
-  TF_VAR_apm_port="${APM_PORT}" \
+    TF_VAR_apm_image_version="${APM_IMAGE_VERSION}" \
+    TF_VAR_apm_port="${APM_PORT}" \
     terraform -chdir=terraform apply -auto-approve
 }
 
@@ -120,7 +120,7 @@ function envs() {
 # an skr policy is attached to the key to allow the APM enclave to use it
 function master_key() {
   if ! get_master_key_id; then
-    envsubst < config/skrpolicy.json.tpl > ${TMPDIR}/skrpolicy.json
+    envsubst <config/skrpolicy.json.tpl >${TMPDIR}/skrpolicy.json
     az keyvault key create \
       --exportable true \
       --vault-name "${APM_KEYVAULT_NAME}" \
@@ -146,11 +146,11 @@ function master_key_encrypt_akv() {
 
   # NOTE: SKR client in the enclave uses RSA-OAEP-256 algorithm
   az keyvault key encrypt \
-      --name "${APM_MASTER_KEY}" \
-      --vault-name "${APM_KEYVAULT_NAME}" \
-      --algorithm RSA-OAEP-256 \
-      --data-type plaintext \
-      --value "${value}" | jq -r .result
+    --name "${APM_MASTER_KEY}" \
+    --vault-name "${APM_KEYVAULT_NAME}" \
+    --algorithm RSA-OAEP-256 \
+    --data-type plaintext \
+    --value "${value}" | jq -r .result
 }
 
 # `build` builds the APM Docker Image and Confidential Container Disk
@@ -162,7 +162,7 @@ function build() {
   echo "Building the APM Disk..."
   rm -f "${TMPDIR}/enclave.yaml"
   APM_MK_ID=$(get_master_key_id) \
-    envsubst < config/enclave.yaml.tpl > ${TMPDIR}/enclave.yaml
+    envsubst <config/enclave.yaml.tpl >${TMPDIR}/enclave.yaml
   anjuna-azure-cli disk create \
     --docker-uri "${image_name}" \
     --disk-size "${APM_DISK_SIZE}" \
@@ -194,8 +194,8 @@ function generate_pfx() {
   local -r tlsdir=$TMPDIR/tls
   mkdir -p ${tlsdir}
 
-  envsubst < config/csr.conf.tpl > "${tlsdir}/csr.conf"
-  envsubst < config/cert.conf.tpl > "${tlsdir}/cert.conf"
+  envsubst <config/csr.conf.tpl >"${tlsdir}/csr.conf"
+  envsubst <config/cert.conf.tpl >"${tlsdir}/cert.conf"
 
   openssl req -x509 \
     -sha256 \
@@ -224,7 +224,10 @@ function generate_pfx() {
     -in ${tlsdir}/cert.pem \
     -export \
     -out "${tlsdir}/cert.pfx" \
-    -password "pass:${password}"
+    -password "pass:${password}" \
+    -keypbe AES-256-CBC \
+    -certpbe AES-256-CBC \
+    -macalg SHA256
 
   echo "${tlsdir}/cert.pfx"
 }
@@ -286,15 +289,15 @@ function instruct() {
 
   echo "--------------------------------------------------------------------------------"
   echo "Please run the following command to add the APM server IP and host name to your /etc/hosts:"
-  echo;
+  echo
   echo "  echo ${APM_IP_ADDRESS} ${APM_HOSTNAME} | sudo tee -a /etc/hosts"
-  echo;
-  echo "This enables the APM client to communicate securely with the APM Server from your environment with TLS."
-  echo;
+  echo
+  echo "This enables the APM client to communicate securely with the Vault server from your environment with TLS."
+  echo
   echo "Run the following commands before future invocations of the anjuna-policy-manager client:"
-  echo;
+  echo
   echo "  source client_env.sh"
-  echo;
+  echo
   echo "--------------------------------------------------------------------------------"
 }
 
@@ -413,7 +416,7 @@ function checkenv() {
   return ${nok}
 }
 
-function usage(){
+function usage() {
   cat <<EOF
 Usage:
  $0 <command> <options>
@@ -488,24 +491,54 @@ APM_INSTALLER_URL=""
 SKIP_IMAGE=""
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-  -h | --help) usage; exit 0;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
 
-  deploy)       OPERATION=deploy;;
-  stop)         OPERATION=stop;;
-  destroy)      OPERATION=destroy;;
-  cleanup)      OPERATION=cleanup;;
-  checkenv)     OPERATION=checkenv;;
+  deploy) OPERATION=deploy ;;
+  stop) OPERATION=stop ;;
+  destroy) OPERATION=destroy ;;
+  cleanup) OPERATION=cleanup ;;
+  checkenv) OPERATION=checkenv ;;
 
-  --hostname)                   APM_HOSTNAME="$2"; shift;;
-  --port)                       APM_PORT="$2"; shift;;
-  --image-version)              APM_IMAGE_VERSION="$2"; shift;;
-  --disk-size)                  APM_DISK_SIZE="$2"; shift;;
-  --anjuna-api-token)           ANJUNA_API_TOKEN="$2"; shift;;
-  --tls-pfx)                    APM_TLS_PFX="$2"; shift;;
-  --tls-pfx-password)           APM_TLS_PFX_PASSWORD="$2"; shift;;
-  --anjuna-azure-installer-url) ANJUNA_AZURE_INSTALLER_URL="$2"; shift;;
-  --apm-installer-url)          APM_INSTALLER_URL="$2"; shift;;
-  --skip-image)                 SKIP_IMAGE="yes";;
+  --hostname)
+    APM_HOSTNAME="$2"
+    shift
+    ;;
+  --port)
+    APM_PORT="$2"
+    shift
+    ;;
+  --image-version)
+    APM_IMAGE_VERSION="$2"
+    shift
+    ;;
+  --disk-size)
+    APM_DISK_SIZE="$2"
+    shift
+    ;;
+  --anjuna-api-token)
+    ANJUNA_API_TOKEN="$2"
+    shift
+    ;;
+  --tls-pfx)
+    APM_TLS_PFX="$2"
+    shift
+    ;;
+  --tls-pfx-password)
+    APM_TLS_PFX_PASSWORD="$2"
+    shift
+    ;;
+  --anjuna-azure-installer-url)
+    ANJUNA_AZURE_INSTALLER_URL="$2"
+    shift
+    ;;
+  --apm-installer-url)
+    APM_INSTALLER_URL="$2"
+    shift
+    ;;
+  --skip-image) SKIP_IMAGE="yes" ;;
   *)
     echo "Unknown option: $1"
     usage
@@ -516,4 +549,4 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # Execute the requested operation
-$OPERATION;
+$OPERATION
