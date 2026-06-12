@@ -28,6 +28,8 @@ RUN git clone https://github.com/Azure/confidential-computing-cvm-guest-attestat
 
 FROM builder AS runner
 
+ARG VAULT_VERSION=1.21.1
+
 WORKDIR /root/
 
 # Install Vault
